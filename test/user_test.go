@@ -13,34 +13,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
-
-func TestUser(t *testing.T) {
-	db := config.Connection()
-
-	user := model.User{
-		ID:       uuid.NewString(),
-		Name:     "Jordan",
-		Email:    "jordan@mail.com",
-		Password: "12345678",
-	}
-
-	db.Create(&user)
-}
-
-func TestUserRepository(t *testing.T) {
-	db := config.Connection()
-	user := model.User{
-		ID:       uuid.NewString(),
-		Name:     "Alexia",
-		Email:    "alexia@mail.com",
-		Password: "12345678",
-	}
-
-	r := repositories.NewUserReopsitory(db)
-	r.Create(&user)
-}
 
 func TestUserService(t *testing.T) {
 	v := config.NewValidator()
@@ -58,63 +34,92 @@ func TestUserService(t *testing.T) {
 
 }
 
-func TestUserController(t *testing.T) {
+func TestCreateUserSuccess(t *testing.T) {
 	app := Init()
 
-	responseBody := model.UserRequest{
+	requestBody := model.UserRequest{
 		ID:       uuid.NewString(),
-		Name:     "Suna",
-		Email:    "suna@mail.com",
+		Name:     "Angela",
+		Email:    "angela@mail.com",
 		Password: "12345678",
 	}
 
-	body, err := json.Marshal(responseBody)
-	fmt.Println("body:", string(body))
-	if err != nil {
-		fmt.Println("error marshal:", err)
-	}
+	body, err := json.Marshal(requestBody)
+	assert.Nil(t, err)
 	request := httptest.NewRequest(http.MethodPost, "/api/users", strings.NewReader(string(body)))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
 
 	response, err := app.Test(request)
-	if err != nil {
-		fmt.Println("error fiber:", err)
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, response.StatusCode)
 
 	bytes, err := io.ReadAll(request.Body)
-	if err != nil {
-		fmt.Println("error read all:", err)
-	}
+	assert.Nil(t, err)
 
 	err = json.Unmarshal(bytes, response)
-	if err != nil {
-		fmt.Println("error unmarshal:", err)
-	}
-	fmt.Println("status code:", response.StatusCode)
-}
+	assert.Nil(t, err)
 
-func TestFindAll(testing *testing.T) {
+	assert.Equal(t, "Angela", requestBody.Name)
+	assert.Equal(t, "angela@mail.com", requestBody.Email)
+	assert.Equal(t, "12345678", requestBody.Password)
+
+}
+func TestCreateUserFailed(t *testing.T) {
 	app := Init()
 
+	requestBody := model.UserRequest{
+		ID:       uuid.NewString(),
+		Name:     "",
+		Email:    "alexa@mail.com",
+		Password: "12345678",
+	}
+
+	body, err := json.Marshal(requestBody)
+	assert.Nil(t, err)
+	request := httptest.NewRequest(http.MethodPost, "/api/users", strings.NewReader(string(body)))
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
+	response, err := app.Test(request)
+	assert.Nil(t, err)
+	assert.Equal(t, 500, response.StatusCode)
+
+}
+
+func TestFindAllSuccess(t *testing.T) {
+	app := Init()
+	CreateUser()
+	CreateUser()
 	request := httptest.NewRequest(http.MethodGet, "/api/users", nil)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
 
 	response, err := app.Test(request)
-	if err != nil {
-		fmt.Println("error fiber:", err)
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, fiber.StatusOK, response.StatusCode)
 
-	fmt.Println("status code:", response.StatusCode)
-	db := config.Connection()
-	users := []*model.User{}
-	db.Limit(10).Find(&users)
-	for _, user := range users {
-		fmt.Println("id :", user.ID)
-		fmt.Println("name :", user.Name)
-		fmt.Println("email :", user.Email)
-		fmt.Println("create_at :", user.CreatedAt)
-		fmt.Println("update_at :", user.UpdatedAt)
-	}
+	body, err := io.ReadAll(response.Body)
+	assert.Nil(t, err)
+
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+
+	users := responseBody["data"].([]interface{})
+
+	user1 := users[0].(map[string]interface{})
+	user2 := users[0].(map[string]interface{})
+	assert.NotNil(t, user1, "user name not null")
+	assert.NotNil(t, user2, "user name not null")
+}
+func TestFindAllFailed(t *testing.T) {
+	app := Init()
+
+	request := httptest.NewRequest(http.MethodGet, "/users", nil)
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
+	response, err := app.Test(request)
+	assert.Nil(t, err)
+	assert.Equal(t, 404, response.StatusCode)
 }

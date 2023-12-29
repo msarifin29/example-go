@@ -8,8 +8,21 @@ func PanicIfError(err error) {
 	}
 }
 
-func LogInfo(key string, args ...interface{}) *logrus.Entry {
+func NewLogging() *logrus.Logger {
 	logging := logrus.New()
+	return logging
+}
+
+func LogInfo(key string, args ...interface{}) *logrus.Logger {
+	logging := NewLogging()
 	logging.SetFormatter(&logrus.JSONFormatter{})
-	return logging.WithField(key, args)
+	logging.WithField(key, args).Info(key)
+	return logging
+}
+
+func LogFatal(key string, args ...interface{}) *logrus.Logger {
+	logging := NewLogging()
+	logging.SetFormatter(&logrus.JSONFormatter{})
+	logging.Fatalf("%s : %v", key, args)
+	return logging
 }

@@ -17,9 +17,9 @@ func (u *User) TableName() string {
 
 type UserRequest struct {
 	ID       string `json:"id" validate:"required"`
-	Name     string `json:"name" alidate:"required,max=100"`
-	Email    string `json:"email" alidate:"required,email,max=100"`
-	Password string `json:"password" alidate:"required,max=8"`
+	Name     string `json:"name" validate:"required,max=100"`
+	Email    string `json:"email" validate:"required,email,max=100"`
+	Password string `json:"password" validate:"required,max=8"`
 }
 
 type UserResponse struct {

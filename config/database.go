@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"gorm-example/helper"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,8 +23,16 @@ func Connection() *gorm.DB {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		panic("failed to connect database")
+		helper.LogFatal("failed to connect database", err)
 	}
+	connection, err := db.DB()
+	if err != nil {
+		helper.LogFatal("failed to connect database", err)
+	}
+	connection.SetMaxIdleConns(5)
+	connection.SetMaxOpenConns(20)
+	connection.SetConnMaxLifetime(60 * time.Minute)
+	connection.SetConnMaxIdleTime(10 * time.Minute)
 
 	return db
 }

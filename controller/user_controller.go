@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"gorm-example/helper"
 	"gorm-example/model"
 	"gorm-example/services"
 
@@ -20,12 +20,12 @@ func (c *UserController) Create(ctx *fiber.Ctx) error {
 	request := new(model.UserRequest)
 	err := ctx.BodyParser(request)
 	if err != nil {
-		fmt.Println("error parser :", err)
+		helper.LogInfo("error parser :", err)
 		return fiber.ErrBadRequest
 	}
 	response, err := c.UserService.Create(ctx.Context(), *request)
 	if err != nil {
-		fmt.Println("error create controller :", err)
+		helper.LogInfo("error create controller :", err)
 		return fiber.ErrInternalServerError
 	}
 	return ctx.JSON(model.WebResponse{
@@ -37,7 +37,7 @@ func (c *UserController) Create(ctx *fiber.Ctx) error {
 func (c *UserController) FindAll(ctx *fiber.Ctx) error {
 	users, err := c.UserService.FindAll(ctx.Context())
 	if err != nil {
-		fmt.Println("error find all controller :", err)
+		helper.LogInfo("error find all controller :", err)
 		return fiber.ErrInternalServerError
 	}
 	return ctx.JSON(model.WebResponse{

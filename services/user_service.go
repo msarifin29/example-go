@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"fmt"
+	"gorm-example/helper"
 	"gorm-example/model"
 	"gorm-example/repositories"
 
@@ -27,11 +27,11 @@ func (s *UserService) Create(ctx context.Context, request model.UserRequest) (*m
 	defer tx.Rollback()
 
 	if err := s.Validate.Struct(request); err != nil {
-		fmt.Println("err validate :", err)
+		helper.LogInfo("err validate :", err)
 		return nil, fiber.ErrBadRequest
 	}
 	if err := tx.Commit().Error; err != nil {
-		fmt.Println("err commit :", err)
+		helper.LogInfo("err commit :", err)
 		return nil, fiber.ErrInternalServerError
 	}
 
@@ -63,7 +63,6 @@ func (s *UserService) FindAll(ctx context.Context) ([]*model.UserResponse, error
 			Name:      user.Name,
 			Email:     user.Email,
 			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
 		}
 		responseUsers = append(responseUsers, &response)
 	}
