@@ -1,5 +1,0 @@
-database:
-  user_name: "root"
-  host: "localhost"
-  port: 3306
-  database_name: "hrms"
