@@ -13,4 +13,5 @@ type RouteCofig struct {
 
 func (r *RouteCofig) Setup() {
 	r.App.Post("/api/users", r.UserController.Create)
+	r.App.Get("/api/users", r.UserController.FindAll)
 }

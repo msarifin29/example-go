@@ -16,3 +16,9 @@ func (r *UserRepository) Create(user *model.User) *model.User {
 	r.DB.Create(&user)
 	return user
 }
+
+func (r *UserRepository) FindAll() []*model.User {
+	users := []*model.User{}
+	r.DB.Limit(10).Find(&users)
+	return users
+}

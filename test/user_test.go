@@ -93,3 +93,28 @@ func TestUserController(t *testing.T) {
 	}
 	fmt.Println("status code:", response.StatusCode)
 }
+
+func TestFindAll(testing *testing.T) {
+	app := Init()
+
+	request := httptest.NewRequest(http.MethodGet, "/api/users", nil)
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
+	response, err := app.Test(request)
+	if err != nil {
+		fmt.Println("error fiber:", err)
+	}
+
+	fmt.Println("status code:", response.StatusCode)
+	db := config.Connection()
+	users := []*model.User{}
+	db.Limit(10).Find(&users)
+	for _, user := range users {
+		fmt.Println("id :", user.ID)
+		fmt.Println("name :", user.Name)
+		fmt.Println("email :", user.Email)
+		fmt.Println("create_at :", user.CreatedAt)
+		fmt.Println("update_at :", user.UpdatedAt)
+	}
+}

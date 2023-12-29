@@ -50,3 +50,22 @@ func (s *UserService) Create(ctx context.Context, request model.UserRequest) (*m
 		Password: user.Password,
 	}, nil
 }
+
+func (s *UserService) FindAll(ctx context.Context) ([]*model.UserResponse, error) {
+	tx := s.DB.WithContext(ctx).Begin()
+	defer tx.Rollback()
+	var responseUsers []*model.UserResponse
+	users := s.UserRepository.FindAll()
+
+	for _, user := range users {
+		response := model.UserResponse{
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		}
+		responseUsers = append(responseUsers, &response)
+	}
+	return responseUsers, nil
+}

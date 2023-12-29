@@ -32,5 +32,17 @@ func (c *UserController) Create(ctx *fiber.Ctx) error {
 		Code:   fiber.StatusOK,
 		Status: "Success create user",
 		Data:   response})
+}
 
+func (c *UserController) FindAll(ctx *fiber.Ctx) error {
+	users, err := c.UserService.FindAll(ctx.Context())
+	if err != nil {
+		fmt.Println("error find all controller :", err)
+		return fiber.ErrInternalServerError
+	}
+	return ctx.JSON(model.WebResponse{
+		Code:   fiber.StatusOK,
+		Status: "Success get users",
+		Data:   users,
+	})
 }
